@@ -33,9 +33,10 @@ Example:
     python plex_api_poster_update.py
 
 TODO:
-1) Actually implement better logging than the archaic print statements.
-2) Allow for args/options to be passed such as dir or ratio matching.
+1) Actually implement better logging than the archaic print statements
+2) Allow for args/options to be passed such as dir or ratio matching
 3) Possibly validate if poster needs updated rather than just uploading blindly
+4) Extend to update collections or even create them
 '''
 
 from plexapi.server import PlexServer, CONFIG
