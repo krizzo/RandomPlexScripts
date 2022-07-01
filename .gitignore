@@ -1,0 +1,24 @@
+# Default to blocking everything from Git
+# this is to require human thought even if it
+# is to remove the * line below
+*
+# Perit any .gitignore or .dockerignore file if in any subdir already
+# allowed in the git repo
+!.gitignore
+!.gitmodules
+!.dockerignore
+
+# Perit this the manageContainers management function into git
+!/manageContainers
+
+# Perit any README.md file if in any subdir already
+# allowed in the git repo
+!README.md
+
+# Permit repo specific directories / items
+!/PosterUpdater/
+!/PosterUpdater/**/
+!/PosterUpdater/plex_api_poster_update.py
+
+# Lets keep all dirs but not commit any image files
+!.keep
