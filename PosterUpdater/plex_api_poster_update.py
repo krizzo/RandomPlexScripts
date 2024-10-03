@@ -37,6 +37,12 @@ TODO:
 2) Allow for args/options to be passed such as dir or ratio matching
 3) Possibly validate if poster needs updated rather than just uploading blindly
 4) Extend to update collections or even create them
+5) Allow for match testing of strings
+
+Fuzzy fails
+Plex Name,Poster Name,Notes
+Star Wars: Episode VI - Return of the Jedi (1983),Return of the Jedi (1983), Lower than 78 ratio match strength
+Star Wars: Episode V - The Empire Strikes Back (1980),The Empire Strikes Back (1980), Lower than 78 ratio match strength
 '''
 
 from plexapi.server import PlexServer, CONFIG
@@ -78,12 +84,12 @@ def process_library_posters(library=None, posters_files=None, MyPlexServer=None,
         78% appears to be a good value for updating a poster correctly matching it's name to the media name from plex.
         https://python-plexapi.readthedocs.io/en/latest/modules/mixins.html#plexapi.mixins.PosterMixin
     """
-    range_count = 0
-    ratio_percentile = ratio_val_max - ((precential_int / 100) * (ratio_val_max - ratio_val_min))
-    lowest_ratio = 100
     ratio_val_min = 78 # Inclusive
     ratio_val_max = 100 # Exclusive
     precential_int = 25
+    range_count = 0
+    ratio_percentile = ratio_val_max - ((precential_int / 100) * (ratio_val_max - ratio_val_min))
+    lowest_ratio = 100
     try:
         for media in MyPlexServer.library.section(library).all():
             name = '{} ({})'.format(media.title, media.year)
@@ -92,14 +98,14 @@ def process_library_posters(library=None, posters_files=None, MyPlexServer=None,
             poster_name = process.extractOne(name, posters_files.keys(), scorer=fuzz.token_sort_ratio)
             if poster_name != None:
                 if poster_name[1] >= min_ratio_match:
-                    # print(f"--- DEBUG - Ratio {poster_name[1]} matched for poster key '{poster_name[0]}' with file path value of '{posters_files[poster_name[0]]}'")
-                    # print(f"--- INFO  - Poster found above min ratio of {min_ratio_match} updating now...")
+                    print(f"--- DEBUG - Ratio {poster_name[1]} matched for poster key '{poster_name[0]}' with file path value of '{posters_files[poster_name[0]]}'")
+                    print(f"--- INFO  - Poster found above min ratio of {min_ratio_match} updating now...")
                     media.uploadPoster(filepath=posters_files[poster_name[0]])
-                    # if poster_name[1] in range(ratio_val_min, (ratio_val_max + 1)):
-                    #     range_count += 1
-                    #     if poster_name[1] < lowest_ratio: lowest_ratio = poster_name[1]
-                    #     if poster_name[1] < ratio_percentile: print(f"--- DEBUG - {precential_int}th percentile in range poster: '{poster_name}' - media formatted name:   '{name}'")
-        # print(f"--- DEBUG - {range_count} identified posters for {library} between {ratio_val_min} - {ratio_val_max} with lowest ratio of {lowest_ratio}")
+                    if poster_name[1] in range(ratio_val_min, (ratio_val_max + 1)):
+                        range_count += 1
+                        if poster_name[1] < lowest_ratio: lowest_ratio = poster_name[1]
+                        if poster_name[1] < ratio_percentile: print(f"--- DEBUG - {precential_int}th percentile in range poster: '{poster_name}' - media formatted name:   '{name}'")
+        print(f"--- DEBUG - {range_count} identified posters for {library} between {ratio_val_min} - {ratio_val_max} with lowest ratio of {lowest_ratio}")
     except NoneType as e:
         print(f"!!! WARN  - No match found.\n{e}")
     except Exception as e:
@@ -116,7 +122,6 @@ def main():
 
     for library in library_names:
         poster_files = get_posters_files_of_library(library=library)
-        # print(f"--- INFO  - Poster Files:\n{poster_files}")
         process_library_posters(library, poster_files, MyPlexServer)
 
 
